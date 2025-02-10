@@ -1,10 +1,11 @@
 /*
  * Tutorial 4 Jeopardy Project for SOFE 3950U / CSCI 3020U: Operating Systems
  *
- * Copyright (C) 2015, <GROUP MEMBERS>
+ * Copyright (C) 2024, <GROUP 6>
  * All rights reserved.
- *
+ * Kishan,Hermon,Ronald,Kanishk
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,72 +72,116 @@ void update_score(player *players, int num_players, char *name, int score) {
     }
 }
 
-int main(void) {
-    char buffer[BUFFER_LEN];
-    player players[NUM_PLAYERS];
+int gameState;
+int numQ = NUM_QUESTIONS;
 
-    // Initialize the game
+int main(void){
+       
+    // Buffer for user input
+    char buffer[BUFFER_LEN] = { 0 };
+        
+    // An array of 4 players, may need to be a pointer if you want it set dynamically
+        player players[NUM_PLAYERS];    
+
+    // a exapmle: player 1 is named Omar
+	// players[0].name = "Omar";
+    strcpy(players[0].name, "Omar");
+    printf("%s\n", players[0].name);
+
+    
+
+    // Display the game introduction aswell as initialize the questions
     initialize_game();
-    initialize_players(players, NUM_PLAYERS);
 
-    // Main game loop
-    while (1) {
-        // Display the remaining categories and question values
+    printf("%s\n", "PLEASE USE ALL CAPS WHEN RESPONDING");
+    printf("%s\n", "Before answering a question PLEASE reply with name first");
+    printf("%s\n", "Answer must begin with what or who");
+    // Prompt for players names
+    // initialize each of the players in the array
+    for(int i = 0; i < NUM_PLAYERS; i++){
+        printf("%s %d: ", "Enter Player", i+1);
+        scanf("%[^\n]%*c", players[i].name);
+        players[i].score = 0;
+        printf("\n");
+    }
+
+    // Perform an infinite loop getting command input from users until game ends
+    gameState = 1;
+    char str[4][BUFFER_LEN] = {{0}};
+    while (gameState == 1){
+        char *token;
+        char *name, *word;
+        //display questions
         display_categories();
 
-        // Get the player's choice of category and value
-        printf("Enter category and value (e.g., programming 100): ");
+        //get name
+        printf("%s\n", "Please enter your name to select a category");
         fgets(buffer, BUFFER_LEN, stdin);
-        buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline character
+        name = strtok(buffer, "\n");
 
-        // Tokenize the input
-        char *tokens[3];
-        tokenize(buffer, tokens);
-
-        if (tokens[0] == NULL || tokens[1] == NULL) {
-            printf("Invalid input. Please enter a category and value.\n");
-            continue;
-        }
-
-        char *category = tokens[0];
-        int value = atoi(tokens[1]);
-
-        // Display the question
-        display_question(category, value);
-
-        // Get the player's answer
-        printf("Enter your answer: ");
-        fgets(buffer, BUFFER_LEN, stdin);
-        buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline character
-
-        // Check if the answer is correct
-        if (valid_answer(category, value, buffer)) {
-            printf("Correct!\n");
-            // Update the player's score
-            printf("Enter your name: ");
+        //check if player is in game
+        if(player_exists(players, NUM_PLAYERS, name) == true){
+            //ask player to pick category and value
+            printf("%s\n", "Please enter a category value");
             fgets(buffer, BUFFER_LEN, stdin);
-            buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline character
-            update_score(players, NUM_PLAYERS, buffer, value);
-        } else {
-            printf("Incorrect. The correct answer was: %s\n", questions[0].answer);
-        }
 
-       
+            //rmv \n
+            token = strtok(buffer, "\n");
+            //get category
+            word = strtok(token, " ");
+            strcpy(str[0], word);
+            //get val
+            word = strtok(NULL, " ");
+            strcpy(str[1], word);
+            token = NULL;
 
-        // Check if all questions have been answered
-        bool all_answered = true;
-        for (int i = 0; i < NUM_QUESTIONS; i++) {
-            if (!questions[i].answered) {
-                all_answered = false;
-                break;
+            if(already_answered(str[0], atoi(str[1])) == true){
+                printf("%s\n", "please select an unselected value and category");
+                //display question
+                display_question(str[0], atoi(str[1]));
+            }else{
+                //display question
+                display_question(str[0], atoi(str[1]));
             }
+
+            memset(buffer, 0, BUFFER_LEN);
+            fgets(buffer, BUFFER_LEN, stdin);
+
+            //rmv \n
+            token = strtok(buffer, "\n");
+
+            //get beginning
+            word = strtok(token, " ");
+            strcpy(str[2], word);
+
+            //get rest of answer
+            word = strtok(NULL, "");
+            strcpy(str[3], word);
+            token = NULL;
+
+            //1 less question to do
+            numQ--;
+
+            //validate question
+            if(valid_answer(str[0], atoi(str[1]), str[3], str[2]) == true){
+                printf("%s\n", "Correct!");
+                update_score(players, NUM_PLAYERS, name, atoi(str[1]));
+            }else{
+                printf("%s\n", "Incorrect!");
+                display_answer(str[0], atoi(str[1]));
+            }
+
+        }else{
+            printf("%s\n", "Enter a players name that already exists");
         }
-        if (all_answered) {
-            break;
+
+        //check how many questions left
+        if(numQ <= 0){
+            gameState = 0;
         }
     }
 
-    // Display the final results and exit
     show_results(players, NUM_PLAYERS);
+
     return EXIT_SUCCESS;
 }

@@ -76,7 +76,7 @@ void display_question(char *category, int value)
 }
 
 // Returns true if the answer is correct for the question for that category and dollar value
-bool valid_answer(char *category, int value, char *answer)
+bool valid_answer(char *category, int value, char *answer,char*firstWord)
 {
     // Look into string comparison functions
     for (int i = 0; i < NUM_QUESTIONS; i++) {
@@ -86,6 +86,19 @@ bool valid_answer(char *category, int value, char *answer)
     }
     
     return false;
+}
+
+//Display correct answers for the catagory ans value
+void display_answer(char*category, int value){
+    //Looks for question in the array
+    for(int i=0; i <NUM_QUESTIONS;i++){
+        if(strcmp(questions[i].category, category) == 0 && questions [i].value ==value){
+            printf("Correct answer: %s IS %s\n", questions[i].begin, questions[i].answer);
+        }
+    }
+    //If mating question not found prints error message 
+    printf("Answer not found for catogory: %s and value: %d\n", category, value);
+
 }
 
 // Returns true if the question has already been answered
