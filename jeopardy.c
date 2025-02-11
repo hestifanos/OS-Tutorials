@@ -31,6 +31,7 @@ void tokenize(char *input, char **tokens) {
     tokens[i] = NULL;
 }
 
+/*
 // Displays the game results for each player, their name and final score, ranked from first to last place
 void show_results(player *players, int num_players) {
     // Sort players by score in descending order
@@ -71,7 +72,7 @@ void update_score(player *players, int num_players, char *name, int score) {
         }
     }
 }
-
+*/
 int gameState;
 int numQ = NUM_QUESTIONS;
 
